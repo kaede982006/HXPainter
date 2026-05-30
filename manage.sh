@@ -129,8 +129,8 @@ deploy_windows_dlls() {
         local archive_path="$target_dir/mesa3d.7z"
         curl -sL -o "$archive_path" "https://github.com/pal1000/mesa-dist-win/releases/download/26.1.1/mesa3d-26.1.1-release-mingw.7z" > /dev/null || true
         if command -v 7z >/dev/null 2>&1 && [ -f "$archive_path" ]; then
-            log_info "Extracting Mesa llvmpipe as opengl32sw.dll..."
-            7z e "$archive_path" "x64/opengl32.dll" -o"$target_dir" -y > /dev/null
+            log_info "Extracting Mesa llvmpipe as opengl32sw.dll and libgallium_wgl.dll..."
+            7z e "$archive_path" "x64/opengl32.dll" "x64/libgallium_wgl.dll" -o"$target_dir" -y > /dev/null
             mv "$target_dir/opengl32.dll" "$sw_dll" 2>/dev/null || true
             rm -f "$archive_path"
         else
