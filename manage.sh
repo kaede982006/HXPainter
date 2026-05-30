@@ -122,6 +122,23 @@ deploy_windows_dlls() {
     local svg_dll="/usr/x86_64-w64-mingw32/lib/qt6/plugins/imageformats/qsvg.dll"
     if [ -f "$svg_dll" ]; then cp -n "$svg_dll" "$target_dir/imageformats/"; fi
 
+    # Download opengl32sw.dll for software fallback in VMs if it doesn't exist
+    local sw_dll="$target_dir/opengl32sw.dll"
+    if [ ! -f "$sw_dll" ]; then
+        log_info "Downloading opengl32sw.dll for software rendering fallback (crucial for VMs)..."
+        local archive_path="$target_dir/mesa3d.7z"
+        curl -sL -o "$archive_path" "https://github.com/pal1000/mesa-dist-win/releases/download/26.1.1/mesa3d-26.1.1-release-mingw.7z" > /dev/null || true
+        if command -v 7z >/dev/null 2>&1 && [ -f "$archive_path" ]; then
+            log_info "Extracting Mesa llvmpipe as opengl32sw.dll..."
+            7z e "$archive_path" "x64/opengl32.dll" -o"$target_dir" -y > /dev/null
+            mv "$target_dir/opengl32.dll" "$sw_dll" 2>/dev/null || true
+            rm -f "$archive_path"
+        else
+            log_warn "Failed to download or extract opengl32sw.dll. Software rendering may not work."
+            rm -f "$archive_path"
+        fi
+    fi
+
     log_success "Windows DLLs collected in $target_dir"
 }
 
@@ -141,7 +158,7 @@ case "$1" in
                 echo -e "\n[ownstuff]\nSigLevel = Optional TrustAll\nServer = https://ftp.f3l.de/~martchus/\$repo/os/\$arch" | sudo tee -a /etc/pacman.conf
                 sudo pacman -Sy
             fi
-            PKGS=(base-devel cmake ninja python python-pillow qt6-base qt6-svg mingw-w64-gcc mingw-w64-qt6-base mingw-w64-qt6-svg patchelf)
+            PKGS=(base-devel cmake ninja python python-pillow qt6-base qt6-svg mingw-w64-gcc mingw-w64-qt6-base mingw-w64-qt6-svg patchelf p7zip)
             sudo pacman -S --needed --noconfirm "${PKGS[@]}"
         elif [ -f /etc/fedora-release ]; then
             PKGS=(gcc-c++ cmake ninja-build python3 python3-pillow qt6-qtbase-devel qt6-qtsvg-devel mesa-libGL-devel mingw64-gcc-c++ mingw64-qt6-qtbase mingw64-qt6-qtsvg patchelf)
