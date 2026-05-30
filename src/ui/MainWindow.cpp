@@ -102,12 +102,19 @@ MainWindow::MainWindow(QWidget *parent)
     updateColorControls(canvas_->foregroundColor());
     backgroundButton_->setStyleSheet(swatchStyle(canvas_->backgroundColor()));
 
-    // Delay the modal dialog slightly more to allow the QOpenGLWidget context to fully initialize
-    // and the main window to render its first frame, preventing a white screen freeze on Windows.
-    QTimer::singleShot(250, this, [this] {
-        if (!startupHubShown_ && !canvas_->hasDocument()) {
+    // Create a default empty document on startup instead of blocking the UI thread with a modal dialog.
+    // Showing a modal dialog (QDialog::exec) during or immediately after window creation 
+    // causes the Windows QOpenGLWidget to deadlock during its initial context creation.
+    QTimer::singleShot(0, this, [this] {
+        if (!canvas_->hasDocument()) {
+            NewDocumentSettings settings;
+            settings.width = 1920;
+            settings.height = 1080;
+            settings.backgroundColor = Qt::white;
+            settings.defaultLayerCount = 1;
+            settings.templateName = QStringLiteral("Default Canvas");
+            canvas_->newDocument(settings);
             startupHubShown_ = true;
-            showCreateOpenHub();
         }
     });
 }

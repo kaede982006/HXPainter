@@ -1029,6 +1029,7 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
     QApplication::setApplicationName("HXPainter");
     QApplication::setOrganizationName("HXPainter");
+    
     AppTheme::apply(app);
 
     const IconLoadResult iconResult = IconLoader::loadApplicationIconWithDiagnostics();
