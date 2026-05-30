@@ -6,7 +6,8 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(HXPAINTER_LOGO "${CMAKE_SOURCE_DIR}/logo.png")
+# Use CMAKE_CURRENT_SOURCE_DIR for logo to ensure it's found during out-of-source builds
+set(HXPAINTER_LOGO "${CMAKE_CURRENT_SOURCE_DIR}/logo.png")
 if(NOT EXISTS "${HXPAINTER_LOGO}")
     message(FATAL_ERROR "Required logo file is missing: ${HXPAINTER_LOGO}")
 endif()
@@ -15,6 +16,11 @@ find_package(Qt6 6.5 REQUIRED COMPONENTS Widgets OpenGLWidgets OpenGL Svg)
 
 qt_standard_project_setup()
 set(CMAKE_AUTORCC ON)
+
+# Avoid manifest errors during cross-compilation
+if(WIN32 AND CMAKE_CROSSCOMPILING)
+    set(QT_NO_WINDOWS_FINALIZATION TRUE)
+endif()
 
 set(HXPAINTER_WINDOWS_RESOURCES)
 if(WIN32)
@@ -50,8 +56,17 @@ if(WIN32)
     endif()
 endif()
 
+# Use CMAKE_CURRENT_SOURCE_DIR for platform-specific files to avoid path resolution errors
+set(PLATFORM_SOURCES)
+if(WIN32)
+    list(APPEND PLATFORM_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/platform/win/WinSpecific.cpp")
+elseif(UNIX AND NOT APPLE)
+    list(APPEND PLATFORM_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/platform/linux/LinuxSpecific.cpp")
+endif()
+
 qt_add_executable(HXPainter
     src/main.cpp
+    ${PLATFORM_SOURCES}
     src/app/AppPaths.cpp
     src/app/AppPaths.h
     src/app/IconLoader.cpp
