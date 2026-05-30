@@ -100,10 +100,10 @@ deploy_windows_dlls() {
     fi
 
     local dlls=(
-        "libgcc_s_seh-1.dll" "libstdc++-6.dll" "libwinpthread-1.dll"
+        "libgcc_s_seh-1.dll" "libstdc++-6.dll" "libwinpthread-1.dll" "libssp-0.dll"
         "Qt6Core.dll" "Qt6Gui.dll" "Qt6Widgets.dll" "Qt6OpenGL.dll" "Qt6OpenGLWidgets.dll" "Qt6Svg.dll"
         "libpng16-16.dll" "zlib1.dll" "libharfbuzz-0.dll" "libintl-8.dll" "libglib-2.0-0.dll"
-        "libiconv-2.dll" "libpcre2-16-0.dll" "libdouble-conversion.dll" "libicuin78.dll"
+        "libiconv-2.dll" "libpcre2-16-0.dll" "libpcre2-8-0.dll" "libdouble-conversion.dll" "libicuin78.dll"
         "libicuuc78.dll" "libicudt78.dll" "libzstd.dll" "libfreetype-6.dll" "libgraphite2.dll"
         "libbrotlidec.dll" "libbrotlicommon.dll" "libbz2-1.dll"
     )
