@@ -1013,8 +1013,12 @@ static int runFunctionalRegressionSmokeTest()
     return 0;
 }
 
+void platform_init();
+
 int main(int argc, char *argv[])
 {
+    platform_init();
+
     // Configure default surface format without forcing a specific version or profile
     // to allow Qt to gracefully fallback to software rendering if hardware OpenGL is unavailable on Windows.
     QSurfaceFormat format;

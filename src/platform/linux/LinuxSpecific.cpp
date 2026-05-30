@@ -1,6 +1,7 @@
-// Linux specific implementation for HXPainter
 #include <iostream>
+#include <QDebug>
 
 void platform_init() {
-    std::cout << "Initializing HXPainter for Linux..." << std::endl;
+    // Linux terminal logging works out of the box. Just confirming it's active.
+    qInfo().noquote() << "Linux platform initialized with terminal logging.";
 }
