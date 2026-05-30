@@ -1015,15 +1015,12 @@ static int runFunctionalRegressionSmokeTest()
 
 int main(int argc, char *argv[])
 {
+    // Configure default surface format without forcing a specific version or profile
+    // to allow Qt to gracefully fallback to software rendering if hardware OpenGL is unavailable on Windows.
     QSurfaceFormat format;
-    format.setVersion(3, 3);
-    format.setProfile(QSurfaceFormat::CoreProfile);
     format.setDepthBufferSize(24);
     format.setStencilBufferSize(8);
-    // Allow fallback to software rendering if hardware GL is unavailable
     QSurfaceFormat::setDefaultFormat(format);
-    // Explicitly set Qt to use the best available OpenGL context
-    qputenv("QT_OPENGL", "desktop");
 
     QApplication app(argc, argv);
     QApplication::setApplicationName("HXPainter");

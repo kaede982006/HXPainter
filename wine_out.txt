@@ -1,0 +1,32 @@
+libEGL warning: pci id for fd 31: 10de:2544, driver (null)
+
+pci id for fd 32: 10de:2544, driver (null)
+pci id for fd 61: 10de:2544, driver (null)
+pci id for fd 59: 10de:2544, driver (null)
+0024:fixme:win:RegisterPowerSettingNotification (000000000001005A,{02731015-4510-4526-99e6-e5a17ebd1aea},0): stub
+0024:fixme:setupapi:SetupDiOpenDeviceInterfaceW flags 0x1 not implemented
+0024:fixme:combase:RoGetActivationFactory (L"Windows.UI.ViewManagement.UISettings", {00000035-0000-0000-c000-000000000046}, 00007FFFFE30E8B8): semi-stub
+0024:fixme:ui:factory_QueryInterface {94ea2b94-e9cc-49e0-c0ff-ee64ca8f5b90} not implemented, returning E_NOINTERFACE.
+0024:fixme:combase:RoGetActivationFactory (L"Windows.UI.ViewManagement.UISettings", {00000035-0000-0000-c000-000000000046}, 00007FFFFE30E8B8): semi-stub
+0024:fixme:ui:factory_QueryInterface {94ea2b94-e9cc-49e0-c0ff-ee64ca8f5b90} not implemented, returning E_NOINTERFACE.
+0024:fixme:combase:RoGetActivationFactory (L"Windows.UI.ViewManagement.UISettings", {00000035-0000-0000-c000-000000000046}, 00007FFFFE30E8B8): semi-stub
+0024:fixme:ui:factory_QueryInterface {94ea2b94-e9cc-49e0-c0ff-ee64ca8f5b90} not implemented, returning E_NOINTERFACE.
+0024:fixme:combase:RoGetActivationFactory (L"Windows.UI.ViewManagement.UISettings", {00000035-0000-0000-c000-000000000046}, 00007FFFFE30E8B8): semi-stub
+0024:fixme:ui:factory_QueryInterface {94ea2b94-e9cc-49e0-c0ff-ee64ca8f5b90} not implemented, returning E_NOINTERFACE.
+0024:fixme:dwrite:dwritefactory_CreateMonitorRenderingParams (0000000000000001): monitor setting ignored
+libEGL warning: pci id for fd 35: 10de:2544, driver (null)
+
+pci id for fd 36: 10de:2544, driver (null)
+pci id for fd 65: 10de:2544, driver (null)
+pci id for fd 63: 10de:2544, driver (null)
+0024:fixme:ntdll:NtQuerySystemInformation info_class SYSTEM_PERFORMANCE_INFORMATION
+0024:fixme:msg:ChangeWindowMessageFilter c03e 00000001
+0024:fixme:dwmapi:DwmExtendFrameIntoClientArea (000000000002006A, 00007FFFFE30F2E0) stub
+0024:fixme:win:IsTouchWindow hwnd 000000000002006A, flags 00007FFFFE30F334 stub!
+0024:fixme:dwmapi:DwmExtendFrameIntoClientArea (000000000004008E, 00007FFFFE30F110) stub
+0024:fixme:win:IsTouchWindow hwnd 000000000004008E, flags 00007FFFFE30F164 stub!
+0024:fixme:dwmapi:DwmExtendFrameIntoClientArea (0000000000030096, 00007FFFFE30EC60) stub
+0024:fixme:win:IsTouchWindow hwnd 0000000000030096, flags 00007FFFFE30ECB4 stub!
+0024:fixme:dwmapi:DwmExtendFrameIntoClientArea (00000000000100A8, 00007FFFFE30BA60) stub
+0024:fixme:win:IsTouchWindow hwnd 00000000000100A8, flags 00007FFFFE30BAB4 stub!
+0024:fixme:win:NtUserFlashWindowEx 0x7ffffe308ab0 - semi-stub

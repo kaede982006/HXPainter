@@ -102,7 +102,9 @@ MainWindow::MainWindow(QWidget *parent)
     updateColorControls(canvas_->foregroundColor());
     backgroundButton_->setStyleSheet(swatchStyle(canvas_->backgroundColor()));
 
-    QTimer::singleShot(0, this, [this] {
+    // Delay the modal dialog slightly more to allow the QOpenGLWidget context to fully initialize
+    // and the main window to render its first frame, preventing a white screen freeze on Windows.
+    QTimer::singleShot(250, this, [this] {
         if (!startupHubShown_ && !canvas_->hasDocument()) {
             startupHubShown_ = true;
             showCreateOpenHub();
