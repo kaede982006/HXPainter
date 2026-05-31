@@ -103,8 +103,6 @@ MainWindow::MainWindow(QWidget *parent)
     backgroundButton_->setStyleSheet(swatchStyle(canvas_->backgroundColor()));
 
     // Create a default empty document on startup instead of blocking the UI thread with a modal dialog.
-    // Showing a modal dialog (QDialog::exec) during or immediately after window creation 
-    // causes the Windows QOpenGLWidget to deadlock during its initial context creation.
     QTimer::singleShot(0, this, [this] {
         if (!canvas_->hasDocument()) {
             NewDocumentSettings settings;

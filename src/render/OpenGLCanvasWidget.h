@@ -11,13 +11,13 @@
 #include "tools/ToolManager.h"
 
 #include <QElapsedTimer>
-#include <QOpenGLWidget>
 #include <QPolygonF>
 #include <QRect>
 #include <QString>
 #include <QTransform>
+#include <QWidget>
 
-class OpenGLCanvasWidget final : public QOpenGLWidget {
+class OpenGLCanvasWidget final : public QWidget {
     Q_OBJECT
 
 public:
@@ -83,8 +83,8 @@ Q_SIGNALS:
     void selectionChanged(const QRect &selection);
 
 protected:
-    void paintGL() override;
-    void resizeGL(int width, int height) override;
+    void paintEvent(QPaintEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
     void tabletEvent(QTabletEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
     void mouseDoubleClickEvent(QMouseEvent *event) override;

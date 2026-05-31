@@ -13,12 +13,10 @@ if [ -f /etc/debian_version ]; then
         ninja-build \
         qt6-base-dev \
         qt6-svg-dev \
-        qt6-opengl-dev \
-        libgl1-mesa-dev \
         python3
 else
     echo "Warning: This script is intended for Debian/Ubuntu-based systems."
-    echo "Please ensure you have C++20 compiler, CMake, Ninja, and Qt 6.7+ (Widgets, OpenGL, SVG) installed."
+    echo "Please ensure you have C++20 compiler, CMake, Ninja, and Qt 6.7+ (Widgets, SVG) installed."
 fi
 
 echo "Setup complete. You can now run ./scripts/build_linux.sh"

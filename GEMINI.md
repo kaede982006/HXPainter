@@ -1,13 +1,13 @@
 # HXPainter
 
-HXPainter is a C++/Qt painting application MVP. It provides a conventional painting workspace with a layer-based document system, OpenGL-accelerated canvas, and various drawing tools.
+HXPainter is a C++/Qt painting application MVP. It provides a conventional painting workspace with a layer-based document system, QWidget-backed canvas, and various drawing tools.
 
 ## Project Overview
 
-- **Core Technologies:** C++20, Qt 6.7.3 (Widgets, OpenGL, SVG), CMake.
+- **Core Technologies:** C++20, Qt 6.7.3 (Widgets, SVG), CMake.
 - **Architecture:** 
     - **Document Model:** `CanvasDocument` manages layers (`Layer`) and document settings.
-    - **Rendering:** `OpenGLCanvasWidget` handles high-performance canvas rendering.
+    - **Rendering:** `OpenGLCanvasWidget` is a QWidget-backed canvas renderer.
     - **Tool System:** `BrushEngine`, `EraserEngine`, `FillEngine`, and `TextEngine` implement the core drawing logic.
     - **Command Pattern:** `CommandManager` provides undo/redo support via `Command` objects and document snapshots.
     - **Input:** `TabletInputMapper` handles mouse, tablet, and touch events.

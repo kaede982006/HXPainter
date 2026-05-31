@@ -6,8 +6,10 @@
 #include "ui/TextSettingsDialog.h"
 
 #include <QMouseEvent>
+#include <QPaintEvent>
 #include <QPainter>
 #include <QPainterPath>
+#include <QResizeEvent>
 #include <QTabletEvent>
 #include <QWheelEvent>
 
@@ -161,7 +163,7 @@ QRect subtractAsSingleRect(const QRect &base, const QRect &cut)
 }
 
 OpenGLCanvasWidget::OpenGLCanvasWidget(QWidget *parent)
-    : QOpenGLWidget(parent)
+    : QWidget(parent)
 {
     setMouseTracking(true);
     setFocusPolicy(Qt::StrongFocus);
@@ -567,8 +569,10 @@ void OpenGLCanvasWidget::transformSelection(double rotationDegrees, int targetWi
         .arg(rotationDegrees, 0, 'f', 1));
 }
 
-void OpenGLCanvasWidget::paintGL()
+void OpenGLCanvasWidget::paintEvent(QPaintEvent *event)
 {
+    Q_UNUSED(event);
+
     QElapsedTimer timer;
     timer.start();
 
@@ -643,10 +647,9 @@ void OpenGLCanvasWidget::paintGL()
     stats_.recordFrame(timer.nsecsElapsed() / 1'000'000.0);
 }
 
-void OpenGLCanvasWidget::resizeGL(int width, int height)
+void OpenGLCanvasWidget::resizeEvent(QResizeEvent *event)
 {
-    Q_UNUSED(width);
-    Q_UNUSED(height);
+    Q_UNUSED(event);
     if (pan_.isNull()) {
         centerCanvas();
     }

@@ -12,7 +12,7 @@ if(NOT EXISTS "${HXPAINTER_LOGO}")
     message(FATAL_ERROR "Required logo file is missing: ${HXPAINTER_LOGO}")
 endif()
 
-find_package(Qt6 6.5 REQUIRED COMPONENTS Widgets OpenGLWidgets OpenGL Svg)
+find_package(Qt6 6.5 REQUIRED COMPONENTS Widgets Svg)
 
 qt_standard_project_setup()
 set(CMAKE_AUTORCC ON)
@@ -123,8 +123,6 @@ qt_add_executable(HXPainter
 
 target_link_libraries(HXPainter PRIVATE
     Qt6::Widgets
-    Qt6::OpenGLWidgets
-    Qt6::OpenGL
     Qt6::Svg
 )
 
@@ -168,6 +166,10 @@ add_test(NAME HXPainterMvpSmoke
 
 add_test(NAME HXPainterThemeSmoke
     COMMAND $<TARGET_FILE:HXPainter> --theme-smoke-test
+)
+
+add_test(NAME HXPainterStartupSmoke
+    COMMAND $<TARGET_FILE:HXPainter> --startup-smoke-test
 )
 
 add_test(NAME HXPainterFunctionalRegressionSmoke

@@ -41,33 +41,6 @@
 #include <cmath>
 #include <memory>
 
-#include <QSurfaceFormat>
-
-static bool configureWindowsSoftwareOpenGL(int argc, char *argv[])
-{
-#ifdef Q_OS_WIN
-    if (qEnvironmentVariableIsSet("QT_OPENGL")) {
-        return false;
-    }
-    if (argc <= 0 || argv == nullptr || argv[0] == nullptr) {
-        return false;
-    }
-
-    const QFileInfo executableInfo(QString::fromLocal8Bit(argv[0]));
-    const QString softwareOpenGlPath = executableInfo.absoluteDir().filePath(QStringLiteral("opengl32sw.dll"));
-    if (!QFileInfo::exists(softwareOpenGlPath)) {
-        return false;
-    }
-
-    qputenv("QT_OPENGL", QByteArrayLiteral("software"));
-    return true;
-#else
-    Q_UNUSED(argc);
-    Q_UNUSED(argv);
-    return false;
-#endif
-}
-
 static void appendDiagnosticLog(const QString &message)
 {
     QFile logFile(AppPaths::diagnosticsLogPath());
@@ -1071,7 +1044,7 @@ static int runStartupSmokeTest(const IconLoadResult &iconResult)
         if (!window.isVisible()) {
             fail(QStringLiteral("main window was not visible after entering the event loop"));
         } else if (!canvas) {
-            fail(QStringLiteral("main window did not create an OpenGL canvas"));
+            fail(QStringLiteral("main window did not create the canvas widget"));
         } else if (!canvas->hasDocument()) {
             fail(QStringLiteral("default startup document was not created"));
         } else {
@@ -1090,23 +1063,10 @@ void platform_init();
 int main(int argc, char *argv[])
 {
     platform_init();
-    const bool softwareOpenGlRequested = configureWindowsSoftwareOpenGL(argc, argv);
-
-    // Configure default surface format without forcing a specific version or profile
-    // to allow Qt to gracefully fallback to software rendering if hardware OpenGL is unavailable on Windows.
-    QSurfaceFormat format;
-    format.setDepthBufferSize(24);
-    format.setStencilBufferSize(8);
-    QSurfaceFormat::setDefaultFormat(format);
 
     QApplication app(argc, argv);
     QApplication::setApplicationName("HXPainter");
     QApplication::setOrganizationName("HXPainter");
-
-    if (softwareOpenGlRequested) {
-        appendDiagnosticLog(QStringLiteral("Using bundled opengl32sw.dll via QT_OPENGL=software"));
-        qInfo().noquote() << "Using bundled opengl32sw.dll via QT_OPENGL=software";
-    }
     
     AppTheme::apply(app);
 

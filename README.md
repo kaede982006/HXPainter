@@ -1,6 +1,6 @@
 # HXPainter
 
-HXPainter is a C++/Qt painting application MVP based on the project draft. It now has a conventional painting workspace: menu bar, top toolbar, left tool palette, OpenGL-backed canvas, right-side docks, layer-local painting/erasing, command-based undo/redo, `.hxp` project save/load, image import, and PNG/JPG export.
+HXPainter is a C++/Qt painting application MVP based on the project draft. It now has a conventional painting workspace: menu bar, top toolbar, left tool palette, QWidget-backed canvas, right-side docks, layer-local painting/erasing, command-based undo/redo, `.hxp` project save/load, image import, and PNG/JPG export.
 
 ## Build
 

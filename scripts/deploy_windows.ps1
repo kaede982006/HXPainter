@@ -132,8 +132,6 @@ Assert-RequiredFile $distPath "platforms\qwindows.dll" | Out-Null
 Assert-RequiredFile $distPath "Qt6Core.dll" | Out-Null
 Assert-RequiredFile $distPath "Qt6Gui.dll" | Out-Null
 Assert-RequiredFile $distPath "Qt6Widgets.dll" | Out-Null
-Assert-RequiredFile $distPath "Qt6OpenGL.dll" | Out-Null
-Assert-RequiredFile $distPath "Qt6OpenGLWidgets.dll" | Out-Null
 Assert-RequiredFile $distPath "Qt6Svg.dll" | Out-Null
 Assert-RequiredFile $distPath "iconengines\qsvgicon.dll" | Out-Null
 Assert-RequiredFile $distPath "imageformats\qjpeg.dll" | Out-Null
@@ -159,6 +157,10 @@ if (!$SkipSmokeTest) {
         & $distExe --theme-smoke-test
         if ($LASTEXITCODE -ne 0) {
             throw "Distribution theme smoke test failed with exit code $LASTEXITCODE"
+        }
+        & $distExe --startup-smoke-test
+        if ($LASTEXITCODE -ne 0) {
+            throw "Distribution startup smoke test failed with exit code $LASTEXITCODE"
         }
         & $distExe --functional-regression-smoke-test
         if ($LASTEXITCODE -ne 0) {

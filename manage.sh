@@ -118,9 +118,15 @@ deploy_windows_dlls() {
         return
     fi
 
+    find "$target_dir" -maxdepth 1 -type f -name "*.dll" -delete
+    rm -rf "$target_dir/platforms" \
+           "$target_dir/imageformats" \
+           "$target_dir/iconengines" \
+           "$target_dir/styles"
+
     local dlls=(
         "libgcc_s_seh-1.dll" "libstdc++-6.dll" "libwinpthread-1.dll" "libssp-0.dll"
-        "Qt6Core.dll" "Qt6Gui.dll" "Qt6Widgets.dll" "Qt6OpenGL.dll" "Qt6OpenGLWidgets.dll" "Qt6Svg.dll"
+        "Qt6Core.dll" "Qt6Gui.dll" "Qt6Widgets.dll" "Qt6Svg.dll"
         "libpng16-16.dll" "libjpeg-8.dll" "zlib1.dll" "libharfbuzz-0.dll" "libintl-8.dll" "libglib-2.0-0.dll"
         "libiconv-2.dll" "libpcre2-16-0.dll" "libpcre2-8-0.dll" "libdouble-conversion.dll" "libicuin78.dll"
         "libicuuc78.dll" "libicudt78.dll" "libzstd.dll" "libfreetype-6.dll" "libgraphite2.dll"
@@ -152,23 +158,6 @@ deploy_windows_dlls() {
     copy_qt_plugin "imageformats/qsvg.dll"
     copy_qt_plugin "iconengines/qsvgicon.dll"
     copy_qt_plugin "styles/qmodernwindowsstyle.dll"
-
-    # Download opengl32sw.dll for software fallback in VMs if it doesn't exist
-    local sw_dll="$target_dir/opengl32sw.dll"
-    if [ ! -f "$sw_dll" ]; then
-        log_info "Downloading opengl32sw.dll for software rendering fallback (crucial for VMs)..."
-        local archive_path="$target_dir/mesa3d.7z"
-        curl -sL -o "$archive_path" "https://github.com/pal1000/mesa-dist-win/releases/download/26.1.1/mesa3d-26.1.1-release-mingw.7z" > /dev/null || true
-        if command -v 7z >/dev/null 2>&1 && [ -f "$archive_path" ]; then
-            log_info "Extracting Mesa llvmpipe as opengl32sw.dll and libgallium_wgl.dll..."
-            7z e "$archive_path" "x64/opengl32.dll" "x64/libgallium_wgl.dll" -o"$target_dir" -y > /dev/null
-            mv "$target_dir/opengl32.dll" "$sw_dll" 2>/dev/null || true
-            rm -f "$archive_path"
-        else
-            log_warn "Failed to download or extract opengl32sw.dll. Software rendering may not work."
-            rm -f "$archive_path"
-        fi
-    fi
 
     log_success "Windows DLLs collected in $target_dir"
 }
@@ -205,7 +194,7 @@ case "$1" in
         ensure_sudo
         if [ -f /etc/debian_version ]; then
             sudo apt-get update
-            PKGS=(build-essential cmake ninja-build python3 python3-pillow qt6-base-dev qt6-svg-dev qt6-opengl-dev libgl1-mesa-dev mingw-w64 g++-mingw-w64 patchelf)
+            PKGS=(build-essential cmake ninja-build python3 python3-pillow qt6-base-dev qt6-svg-dev mingw-w64 g++-mingw-w64 patchelf)
             sudo apt-get install -y "${PKGS[@]}"
         elif [ -f /etc/arch-release ]; then
             if ! grep -q "\[ownstuff\]" /etc/pacman.conf; then
