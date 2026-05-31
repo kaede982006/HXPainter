@@ -19,6 +19,7 @@ show_help() {
     echo "  gen         GenBuild: Build for Linux and collect .so dependencies"
     echo "  win         WinBuild: Build for Windows and collect .dll dependencies"
     echo "  test        Run smoke tests (Linux build)"
+    echo "  test-win    Run smoke tests for the Windows build through Wine"
     echo "  run         Run the Linux build"
     echo "  clean       Remove build directories and artifacts"
     echo "  help        Show this help message"
@@ -36,6 +37,23 @@ check_requirements() {
     done
     if [ ${#missing[@]} -ne 0 ]; then
         log_error "Missing required tools: ${missing[*]}. Please run './manage.sh setup' first."
+    fi
+}
+
+check_windows_requirements() {
+    check_requirements
+    local missing=()
+    for cmd in x86_64-w64-mingw32-g++ x86_64-w64-mingw32-windres; do
+        if ! command -v "$cmd" >/dev/null 2>&1; then missing+=("$cmd"); fi
+    done
+    if [ ${#missing[@]} -ne 0 ]; then
+        log_error "Missing Windows build tools: ${missing[*]}. Please run './manage.sh setup' first."
+    fi
+}
+
+check_wine_requirements() {
+    if ! command -v wine >/dev/null 2>&1; then
+        log_error "wine is required to run Windows smoke tests."
     fi
 }
 
@@ -93,6 +111,7 @@ deploy_windows_dlls() {
     log_info "Collecting Windows DLLs (MinGW)..."
     local target_dir="$BUILD_DIR_WINDOWS"
     local mingw_bin="/usr/x86_64-w64-mingw32/bin"
+    local qt_plugin_dir="/usr/x86_64-w64-mingw32/lib/qt6/plugins"
     
     if [ ! -d "$mingw_bin" ]; then
         log_warn "MinGW bin directory not found at $mingw_bin. Skipping DLL collection."
@@ -102,7 +121,7 @@ deploy_windows_dlls() {
     local dlls=(
         "libgcc_s_seh-1.dll" "libstdc++-6.dll" "libwinpthread-1.dll" "libssp-0.dll"
         "Qt6Core.dll" "Qt6Gui.dll" "Qt6Widgets.dll" "Qt6OpenGL.dll" "Qt6OpenGLWidgets.dll" "Qt6Svg.dll"
-        "libpng16-16.dll" "zlib1.dll" "libharfbuzz-0.dll" "libintl-8.dll" "libglib-2.0-0.dll"
+        "libpng16-16.dll" "libjpeg-8.dll" "zlib1.dll" "libharfbuzz-0.dll" "libintl-8.dll" "libglib-2.0-0.dll"
         "libiconv-2.dll" "libpcre2-16-0.dll" "libpcre2-8-0.dll" "libdouble-conversion.dll" "libicuin78.dll"
         "libicuuc78.dll" "libicudt78.dll" "libzstd.dll" "libfreetype-6.dll" "libgraphite2.dll"
         "libbrotlidec.dll" "libbrotlicommon.dll" "libbz2-1.dll"
@@ -114,13 +133,25 @@ deploy_windows_dlls() {
         fi
     done
 
-    mkdir -p "$target_dir/platforms"
-    local platform_dll="/usr/x86_64-w64-mingw32/lib/qt6/plugins/platforms/qwindows.dll"
-    if [ -f "$platform_dll" ]; then cp -n "$platform_dll" "$target_dir/platforms/"; fi
-    
-    mkdir -p "$target_dir/imageformats"
-    local svg_dll="/usr/x86_64-w64-mingw32/lib/qt6/plugins/imageformats/qsvg.dll"
-    if [ -f "$svg_dll" ]; then cp -n "$svg_dll" "$target_dir/imageformats/"; fi
+    copy_qt_plugin() {
+        local plugin_rel="$1"
+        local plugin_source="$qt_plugin_dir/$plugin_rel"
+        local plugin_target_dir="$target_dir/$(dirname "$plugin_rel")"
+        if [ -f "$plugin_source" ]; then
+            mkdir -p "$plugin_target_dir"
+            cp -f "$plugin_source" "$plugin_target_dir/"
+        else
+            log_warn "Qt plugin not found: $plugin_source"
+        fi
+    }
+
+    copy_qt_plugin "platforms/qwindows.dll"
+    copy_qt_plugin "imageformats/qgif.dll"
+    copy_qt_plugin "imageformats/qico.dll"
+    copy_qt_plugin "imageformats/qjpeg.dll"
+    copy_qt_plugin "imageformats/qsvg.dll"
+    copy_qt_plugin "iconengines/qsvgicon.dll"
+    copy_qt_plugin "styles/qmodernwindowsstyle.dll"
 
     # Download opengl32sw.dll for software fallback in VMs if it doesn't exist
     local sw_dll="$target_dir/opengl32sw.dll"
@@ -140,6 +171,30 @@ deploy_windows_dlls() {
     fi
 
     log_success "Windows DLLs collected in $target_dir"
+}
+
+run_windows_smoke_tests() {
+    local exe="$BUILD_DIR_WINDOWS/HXPainter.exe"
+    if [ ! -f "$exe" ]; then
+        log_error "Windows executable not found at $exe. Run './manage.sh win' first."
+    fi
+    check_wine_requirements
+
+    local tests=(
+        "--smoke-icon-test"
+        "--mvp-smoke-test"
+        "--theme-smoke-test"
+        "--functional-regression-smoke-test"
+    )
+
+    cd "$BUILD_DIR_WINDOWS"
+    for test_arg in "${tests[@]}"; do
+        log_info "Running Windows smoke test through Wine: $test_arg"
+        wine HXPainter.exe "$test_arg"
+    done
+    cd "$ROOT_DIR"
+
+    log_success "Windows Wine smoke tests passed."
 }
 
 # --- Command Implementation ---
@@ -179,7 +234,7 @@ case "$1" in
         ;;
 
     win)
-        check_requirements
+        check_windows_requirements
         log_info "Starting WinBuild (Windows Cross-compile)..."
         TOOLCHAIN_FILE="$SOURCE_DIR/cmake/x86_64-w64-mingw32.cmake"
         [ -f "$TOOLCHAIN_FILE" ] || log_error "Toolchain file missing: $TOOLCHAIN_FILE"
@@ -197,6 +252,10 @@ case "$1" in
         else
             log_error "Build directory not found. Run './manage.sh gen' first."
         fi
+        ;;
+
+    test-win|wintest)
+        run_windows_smoke_tests
         ;;
 
     run)
