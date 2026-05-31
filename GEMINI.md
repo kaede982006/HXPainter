@@ -4,10 +4,10 @@ HXPainter is a C++/Qt painting application MVP. It provides a conventional paint
 
 ## Project Overview
 
-- **Core Technologies:** C++20, Qt 6.7.3 (Widgets, SVG), CMake.
+- **Core Technologies:** C++20, Qt 6.7.3 (Widgets, SVG), CMake, Ninja.
 - **Architecture:** 
     - **Document Model:** `CanvasDocument` manages layers (`Layer`) and document settings.
-    - **Rendering:** `OpenGLCanvasWidget` is a QWidget-backed canvas renderer.
+    - **Rendering:** `OpenGLCanvasWidget` is a QWidget-backed canvas renderer. The class name is historical; the current build does not link Qt OpenGL modules.
     - **Tool System:** `BrushEngine`, `EraserEngine`, `FillEngine`, and `TextEngine` implement the core drawing logic.
     - **Command Pattern:** `CommandManager` provides undo/redo support via `Command` objects and document snapshots.
     - **Input:** `TabletInputMapper` handles mouse, tablet, and touch events.
@@ -34,11 +34,12 @@ HXPainter is a C++/Qt painting application MVP. It provides a conventional paint
 ## Building and Running
 
 ### Prerequisites
-- Qt 6.7.3
+- Qt 6.7.3 with Widgets and SVG
 - MinGW 13.1.0
 - CMake 3.21+
 - Ninja
 - Python 3 (for Windows icon generation)
+- Wine (optional, for Linux-hosted Windows smoke tests)
 
 ### Commands
 The project uses a unified management script `manage.sh` on a Linux host for all build and setup tasks.
@@ -73,13 +74,15 @@ The project uses a unified management script `manage.sh` on a Linux host for all
 #### Testing
 - **Run Tests:**
   ```bash
-  cd build-linux && ctest --output-on-failure
+  ./manage.sh test
+  ./manage.sh test-win
   ```
 
   The executable supports several smoke test flags:
   - `--smoke-icon-test`
   - `--mvp-smoke-test`
   - `--theme-smoke-test`
+  - `--startup-smoke-test`
   - `--functional-regression-smoke-test`
 
 ## Development Conventions
