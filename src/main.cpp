@@ -34,6 +34,7 @@
 #include <QTemporaryDir>
 #include <QTextStream>
 #include <QThread>
+#include <QTimer>
 #include <QTouchEvent>
 #include <QDebug>
 
@@ -41,6 +42,41 @@
 #include <memory>
 
 #include <QSurfaceFormat>
+
+static bool configureWindowsSoftwareOpenGL(int argc, char *argv[])
+{
+#ifdef Q_OS_WIN
+    if (qEnvironmentVariableIsSet("QT_OPENGL")) {
+        return false;
+    }
+    if (argc <= 0 || argv == nullptr || argv[0] == nullptr) {
+        return false;
+    }
+
+    const QFileInfo executableInfo(QString::fromLocal8Bit(argv[0]));
+    const QString softwareOpenGlPath = executableInfo.absoluteDir().filePath(QStringLiteral("opengl32sw.dll"));
+    if (!QFileInfo::exists(softwareOpenGlPath)) {
+        return false;
+    }
+
+    qputenv("QT_OPENGL", QByteArrayLiteral("software"));
+    return true;
+#else
+    Q_UNUSED(argc);
+    Q_UNUSED(argv);
+    return false;
+#endif
+}
+
+static void appendDiagnosticLog(const QString &message)
+{
+    QFile logFile(AppPaths::diagnosticsLogPath());
+    if (logFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) {
+        QTextStream stream(&logFile);
+        stream << QDateTime::currentDateTime().toString(Qt::ISODate)
+               << " " << message << Qt::endl;
+    }
+}
 
 static int runMvpSmokeTest()
 {
@@ -1013,11 +1049,48 @@ static int runFunctionalRegressionSmokeTest()
     return 0;
 }
 
+static int runStartupSmokeTest(const IconLoadResult &iconResult)
+{
+    MainWindow window;
+    if (!iconResult.icon.isNull()) {
+        window.setWindowIcon(iconResult.icon);
+    }
+    window.setStartupDiagnostics(iconResult.messages);
+    window.resize(1280, 820);
+    window.show();
+
+    int result = 0;
+    QTimer::singleShot(1800, &window, [&window, &result] {
+        auto fail = [&result](const QString &message) {
+            appendDiagnosticLog(QStringLiteral("Startup smoke test failed: %1").arg(message));
+            qWarning().noquote() << "Startup smoke test failed:" << message;
+            result = 60;
+        };
+
+        OpenGLCanvasWidget *canvas = window.findChild<OpenGLCanvasWidget *>();
+        if (!window.isVisible()) {
+            fail(QStringLiteral("main window was not visible after entering the event loop"));
+        } else if (!canvas) {
+            fail(QStringLiteral("main window did not create an OpenGL canvas"));
+        } else if (!canvas->hasDocument()) {
+            fail(QStringLiteral("default startup document was not created"));
+        } else {
+            appendDiagnosticLog(QStringLiteral("Startup smoke test passed: main window visible and default document created"));
+            qInfo().noquote() << "Startup smoke test passed";
+        }
+        QApplication::quit();
+    });
+
+    QApplication::exec();
+    return result;
+}
+
 void platform_init();
 
 int main(int argc, char *argv[])
 {
     platform_init();
+    const bool softwareOpenGlRequested = configureWindowsSoftwareOpenGL(argc, argv);
 
     // Configure default surface format without forcing a specific version or profile
     // to allow Qt to gracefully fallback to software rendering if hardware OpenGL is unavailable on Windows.
@@ -1029,6 +1102,11 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
     QApplication::setApplicationName("HXPainter");
     QApplication::setOrganizationName("HXPainter");
+
+    if (softwareOpenGlRequested) {
+        appendDiagnosticLog(QStringLiteral("Using bundled opengl32sw.dll via QT_OPENGL=software"));
+        qInfo().noquote() << "Using bundled opengl32sw.dll via QT_OPENGL=software";
+    }
     
     AppTheme::apply(app);
 
@@ -1063,6 +1141,10 @@ int main(int argc, char *argv[])
 
     if (arguments.contains(QStringLiteral("--functional-regression-smoke-test"))) {
         return runFunctionalRegressionSmokeTest();
+    }
+
+    if (arguments.contains(QStringLiteral("--startup-smoke-test"))) {
+        return runStartupSmokeTest(iconResult);
     }
 
     MainWindow window;

@@ -184,6 +184,7 @@ run_windows_smoke_tests() {
         "--smoke-icon-test"
         "--mvp-smoke-test"
         "--theme-smoke-test"
+        "--startup-smoke-test"
         "--functional-regression-smoke-test"
     )
 
